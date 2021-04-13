@@ -59,7 +59,6 @@ class Table {
       resultHtml = resultHtml + makeRow(el);
     });
 
-  const delbutton = () => ``;
   
     return `<div class="input-group">
     
