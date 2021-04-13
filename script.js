@@ -1,4 +1,3 @@
-
 const tableLauout = ``;
 
 const elements = [
@@ -27,11 +26,12 @@ const elements = [
     price: 1160,
   },
 ];
-const btn = (id) => `<button type="button" class="btn btn-info">delete</button>`;
-const button = (id) => `<button id=${id} class="btn btn-primary">Edit</button>`;
-const makeRow = ({id, coll, title, price }) => `<input type="text" class="form-control" placeholder="Search..." aria-label="Recipient's username with two button addons">
-<button type="button" class="btn btn-primary">Search</button>
-<button type="button" class="btn btn-info">Add new</button>
+
+
+
+const btn = (id) => `<button type="button" class="btn btn-info" style="width: 80px; margin: 10px">delete</button>`;
+const button = (id) => `<button id=${id} class="btn btn-primary" style="width: 80px; margin: 10px">Edit</button>`;
+const makeRow = ({id, title, price }) => `
 <tr>
     <td>${title}</td><td>${price}</td><td>${button(id)}</td><td>${btn(id)}</td><td></td>
   </tr>
@@ -59,14 +59,22 @@ class Table {
       resultHtml = resultHtml + makeRow(el);
     });
 
-
-
-
-
-    return `<table>${resultHtml}</table>`;
+  const delbutton = () => ``;
+  
+    return `<div class="input-group">
+    
+    <input type="text" class="form-control" style="width-setter: 100px; margin: 10px;" placeholder="Search..." aria-label="Recipient's username with two button addons">
+    <button type="button" class="btn btn-primary" style="width: 80px; margin: 10px;">Search...</button>
+    <button type="button" class="btn btn-info" style="width: 80px; margin: 10px">Add new</button>
+  </div>
+  <table>${resultHtml}`;
+  
   }
 }
 
 const table = new Table(elements, "table");
 
 table.initialize();
+
+
+
