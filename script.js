@@ -1,79 +1,201 @@
-const tableLauout = ``;
-
-const elements = [
-  {
-    id: 1,
-    count: 1,
-    title: "Цитрамон",
-    price: 50,
-  },
-  {
-    id: 2,
-    count: 2,
-    title: "Аспирин",
-    price: 60,
-  },
-  {
-    id: 3,
-    count: 3,
-    title: "теанин",
-    price: 160,
-  },
-  {
-    id: 4,
-    count: 4,
-    title: "Метамфетамин",
-    price: 1160,
-  },
-];
-
-
-
-const btn = (id) => `<button type="button" class="btn btn-info" style="width: 80px; margin: 10px">delete</button>`;
-const button = (id) => `<button id=${id} class="btn btn-primary" style="width: 80px; margin: 10px">Edit</button>`;
-const makeRow = ({id, title, price }) => `
-<tr>
-    <td>${title}</td><td>${price}</td><td>${button(id)}</td><td>${btn(id)}</td><td></td>
-  </tr>
-`;
-
-
-
-
 class Table {
   constructor(elements, idElemToRenderWithin) {
     this.elements = elements;
+    this.filterElements = elements;
     this.idElemToRenderWithin = idElemToRenderWithin;
+    this.sortingOrder = {
+      orderByName: 'asc',
+      orderByPrice: 'desc'
+    }
   }
 
-  initialize() {
+  initialize () {
+    this.renderTableHeader(this.elements);
+    this.renderTableBody(this.elements);
+  }
+
+  renderTableHeader() {
     let x = document.getElementById(this.idElemToRenderWithin);
-
-    x.insertAdjacentHTML("afterbegin", this.render(this.elements));
+    x.insertAdjacentHTML("afterbegin", this.makeHtmlForTable());
+    x.addEventListener("click", this.tableHandler.bind(this));
   }
 
-  render(elements) {
-    let resultHtml = "";
+  
+  renderTableBody (SortBody, elements) {
+    
+    let elements = elements || this.elements;
+    
+    let x = document.getElementById('tbody');
+    
+    let filter = function () {
+     let input = document.getElementById("search-text");
+       input.addEventListener("keyup", function () {
+     let filter = input.value.toLowerCase(),
+       filterElements = document.querySelectorAll("sortName")
+       filterElements.forEach(item => {
+         if(item.innerHTML.toLowerCase().indexOf(filter) > -1) {
+           item.style.display = "";
+         }else {
+           item.stile.display = "none";
+        }
+        })
+      })
+    }
 
+
+    let SorteredElements;
+
+    if(SortBody === 'byName'){
+
+      SorteredElements = elements.sort((a, b) => a.title.localeCompare(b.title));
+
+      this.sortingOrder.orderByName === 'desc' ? SorteredElements : SorteredElements.reverse();
+
+    } else if (SortBody === 'byPrice') {
+      SorteredElements = elements.sort((a, b) => a.price - b.price);
+
+      this.sortingOrder.orderByPrice === 'asc' ? SorteredElements : SorteredElements.reverse();
+    } else {
+      SorteredElements = elements;
+    }
+    
+    x.insertAdjacentHTML("afterbegin", this.makeHtmlForTableBody(SorteredElements));
+  }
+
+  cleaning() {
+    let div = document.getElementById("table");
+    let container = document.querySelector(".container");
+    div.removeChild(container);
+  }
+
+  cleaningTableBody() {
+    let tbody = document.getElementById("tbody");
+    while (tbody.firstChild) {
+    tbody.removeChild(tbody.firstChild);
+}
+  }
+
+  showArrow(direction, id) {
+    let NameSort = document.getElementById(id);
+    let p = document.createElement('a');
+    p.innerHTML = direction === 'asc' ? '&#11167;': '&#11165;';
+    NameSort.prepend(p);
+  }
+
+  deleteArrow(name) {
+    let Sort = document.getElementById(name);
+    while (Sort.firstChild) {
+      Sort.removeChild(Sort.firstChild);
+    }
+  }
+
+
+  changeArrowSortingDirection (sortedBy,sortingOrder) {
+    if (sortedBy === 'sortName') {
+      this.deleteArrow("PriceSort");
+      this.deleteArrow("NameSort");
+      this.showArrow(this.sortingOrder.orderByName, "NameSort");
+
+    } else if (sortedBy === 'sortPrice') {
+      this.deleteArrow("NameSort");
+      this.deleteArrow("PriceSort");
+      this.showArrow(this.sortingOrder.orderByPrice, "PriceSort");
+    }
+  }
+  
+  tableHandler = function(event) {
+    const dataAttribute = event.target.dataset;
+  
+    if (dataAttribute.action === "edit" && !!dataAttribute.id) {
+      console.log(`Нажата кнопка edit с id ${dataAttribute.id}`);
+    } else if (dataAttribute.action === "delete" && !!dataAttribute.id){
+      console.log(`Нажата кнопка delete с id ${dataAttribute.id}`);
+      this.elements = [ ... this.elements.filter(el => el.id !=dataAttribute.id)];
+      
+      this.cleaningTableBody();
+      this.renderTableBody ();
+
+    } else if (dataAttribute.action === "add") {
+
+      const a = +prompt('Количество','');
+      const b = prompt('Название','');
+      const c = +prompt('Цена','');
+      const length = this.elements.length;
+
+    this.elements = [
+      ...this.elements,
+      {
+        id: length +1,
+        count: a,
+        title: b,
+        price: c,
+      },
+    ];
+
+    this.cleaningTableBody();
+    this.renderTableBody ();
+      
+    } else if (dataAttribute.action === "sortName"){
+      
+      this.sortingOrder.orderByName = this.sortingOrder.orderByName === 'asc' ? 'desc' : 'asc';
+  
+      this.cleaningTableBody();
+      this.renderTableBody ("byName");
+      this.changeArrowSortingDirection(dataAttribute.action, this.sortingOrder);
+
+    } else if (dataAttribute.action === "sortPrice"){
+      
+      this.sortingOrder.orderByPrice = this.sortingOrder.orderByPrice === 'desc' ? 'asc' : 'desc';
+      
+      this.cleaningTableBody();
+      this.renderTableBody ("byPrice");
+      this.changeArrowSortingDirection(dataAttribute.action, this.sortingOrder);
+      
+     
+
+      console.log(this.elements);
+    }
+  
+    console.log(dataAttribute);
+
+  }
+
+  makeHtmlForTable() {
+
+    return `
+    <div class = "container" id = "button">
+      <div class = "row">
+        <div class = "col-2"> </div>
+          <div class = "col-8">
+              ${searchline()}
+              <table class="table table-bordered table-secondary align-middle">
+              <thead>
+                <tr class="table-primary">
+                  <th><div class="d-flex justify-content-around" data-action="sortName" ><div data-action="sortName">Name</div><div id="NameSort" >  </div></div></th>
+                  <th><div class="d-flex justify-content-around" data-action="sortPrice" ><div data-action="sortPrice">Price</div><div id="PriceSort" data-action="sortPrice"></div></div></th>
+                  <th>Action</th>
+                </tr>  
+                </thead>    
+                <tbody id='tbody'>
+                </tbody>       
+              </table>
+          </div>
+        </div>
+    </div>
+ `;
+  } 
+
+  makeHtmlForTableBody(elements) {
+    let resultHtml = "";
+   
     elements.forEach((el) => {
       resultHtml = resultHtml + makeRow(el);
     });
 
-  
-    return `<div class="input-group">
-    
-    <input type="text" class="form-control" style="width-setter: 100px; margin: 10px;" placeholder="Search..." aria-label="Recipient's username with two button addons">
-    <button type="button" class="btn btn-primary" style="width: 80px; margin: 10px;">Search...</button>
-    <button type="button" class="btn btn-info" style="width: 80px; margin: 10px">Add new</button>
-  </div>
-  <table>${resultHtml}`;
-  
-  }
+    return resultHtml;
+  } 
 }
 
 const table = new Table(elements, "table");
 
 table.initialize();
-
-
-

@@ -1,4 +1,12 @@
-.input 
-width 100px;
 
+.bg-down {
+    width: 32px; height: 32px;
+    background: url("img/sorting_sprites.png") -10px -10px;
+ }
+ 
+ 
+ .bg-up {
+    width: 32px; height: 32px;
+    background: url('img/sorting_sprites.png') -62px -10px;
+ }
 
