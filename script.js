@@ -1,7 +1,7 @@
 class Table {
   constructor(elements, idElemToRenderWithin) {
     this.elements = elements;
-    this.filterElements = elements;
+    this.elementsForFiltering = elements;
     this.idElemToRenderWithin = idElemToRenderWithin;
     this.sortingOrder = {
       orderByName: 'asc',
@@ -21,42 +21,26 @@ class Table {
   }
 
   
-  renderTableBody (SortBody, elements) {
+  renderTableBody (SortBody) {
     
-    let elements = elements || this.elements;
+    let filteredElements = elements || this.elements;
     
     let x = document.getElementById('tbody');
-    
-    let filter = function () {
-     let input = document.getElementById("search-text");
-       input.addEventListener("keyup", function () {
-     let filter = input.value.toLowerCase(),
-       filterElements = document.querySelectorAll("sortName")
-       filterElements.forEach(item => {
-         if(item.innerHTML.toLowerCase().indexOf(filter) > -1) {
-           item.style.display = "";
-         }else {
-           item.stile.display = "none";
-        }
-        })
-      })
-    }
-
 
     let SorteredElements;
 
     if(SortBody === 'byName'){
 
-      SorteredElements = elements.sort((a, b) => a.title.localeCompare(b.title));
+      SorteredElements = this.elements.sort((a, b) => a.title.localeCompare(b.title));
 
       this.sortingOrder.orderByName === 'desc' ? SorteredElements : SorteredElements.reverse();
 
     } else if (SortBody === 'byPrice') {
-      SorteredElements = elements.sort((a, b) => a.price - b.price);
+      SorteredElements = this.elements.sort((a, b) => a.price - b.price);
 
       this.sortingOrder.orderByPrice === 'asc' ? SorteredElements : SorteredElements.reverse();
     } else {
-      SorteredElements = elements;
+      SorteredElements = this.elements;
     }
     
     x.insertAdjacentHTML("afterbegin", this.makeHtmlForTableBody(SorteredElements));
@@ -90,7 +74,7 @@ class Table {
   }
 
 
-  changeArrowSortingDirection (sortedBy,sortingOrder) {
+  changeArrowSortingDirection (sortedBy, sortingOrder) {
     if (sortedBy === 'sortName') {
       this.deleteArrow("PriceSort");
       this.deleteArrow("NameSort");
@@ -154,6 +138,14 @@ class Table {
      
 
       console.log(this.elements);
+    } else if (dataAttribute.action === "search") {
+      let input = document.getElementById("search-text");
+
+      let filterText = input.value.toLowerCase();
+      const filteredElements = this.elements.filter(el => el.title.includes(filterText));
+
+      this.renderTableBody(this.sortingOrder, filteredElements);
+      
     }
   
     console.log(dataAttribute);
