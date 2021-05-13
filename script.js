@@ -1,7 +1,6 @@
 class Table {
   constructor(elements, idElemToRenderWithin) {
     this.elements = elements;
-    this.elementsForFiltering = elements;
     this.idElemToRenderWithin = idElemToRenderWithin;
     this.sortingOrder = {
       orderByName: 'asc',
@@ -20,31 +19,15 @@ class Table {
     x.addEventListener("click", this.tableHandler.bind(this));
   }
 
-  
-  renderTableBody (SortBody) {
-    
-    let filteredElements = elements || this.elements;
-    
+  renderTableBody (elements) {
+
+    let elem = elements || this.elements;
+
     let x = document.getElementById('tbody');
 
-    let SorteredElements;
-
-    if(SortBody === 'byName'){
-
-      SorteredElements = this.elements.sort((a, b) => a.title.localeCompare(b.title));
-
-      this.sortingOrder.orderByName === 'desc' ? SorteredElements : SorteredElements.reverse();
-
-    } else if (SortBody === 'byPrice') {
-      SorteredElements = this.elements.sort((a, b) => a.price - b.price);
-
-      this.sortingOrder.orderByPrice === 'asc' ? SorteredElements : SorteredElements.reverse();
-    } else {
-      SorteredElements = this.elements;
-    }
-    
-    x.insertAdjacentHTML("afterbegin", this.makeHtmlForTableBody(SorteredElements));
+    x.insertAdjacentHTML("afterbegin", this.makeHtmlForTableBody(elem));
   }
+
 
   cleaning() {
     let div = document.getElementById("table");
@@ -74,7 +57,7 @@ class Table {
   }
 
 
-  changeArrowSortingDirection (sortedBy, sortingOrder) {
+  changeArrowSortingDirection (sortedBy,sortingOrder) {
     if (sortedBy === 'sortName') {
       this.deleteArrow("PriceSort");
       this.deleteArrow("NameSort");
@@ -86,7 +69,8 @@ class Table {
       this.showArrow(this.sortingOrder.orderByPrice, "PriceSort");
     }
   }
-  
+
+
   tableHandler = function(event) {
     const dataAttribute = event.target.dataset;
   
@@ -119,32 +103,44 @@ class Table {
     this.cleaningTableBody();
     this.renderTableBody ();
       
-    } else if (dataAttribute.action === "sortName"){
-      
-      this.sortingOrder.orderByName = this.sortingOrder.orderByName === 'asc' ? 'desc' : 'asc';
-  
+    } else if (dataAttribute.action === "search") {
+
       this.cleaningTableBody();
-      this.renderTableBody ("byName");
+      
+      let Search = document.getElementById("search-text");
+  
+      let SomeUsers = this.elements.filter(el => el.title.toLowerCase().includes(Search.value.toLowerCase()));
+  
+      this.renderTableBody (SomeUsers);
+      
+    } else if (dataAttribute.action === "sortName"){
+
+      this.sortingOrder.orderByName = this.sortingOrder.orderByName === 'asc' ? 'desc' : 'asc';
+
+      this.cleaningTableBody();
+
+      let SorteredElements = this.elements.sort((a, b) => a.title.localeCompare(b.title));
+
+      this.sortingOrder.orderByName === 'desc' ? SorteredElements : SorteredElements.reverse();
+
+      this.renderTableBody (SorteredElements);
+      
       this.changeArrowSortingDirection(dataAttribute.action, this.sortingOrder);
+
 
     } else if (dataAttribute.action === "sortPrice"){
       
       this.sortingOrder.orderByPrice = this.sortingOrder.orderByPrice === 'desc' ? 'asc' : 'desc';
       
       this.cleaningTableBody();
-      this.renderTableBody ("byPrice");
+
+      let SorteredElements = this.elements.sort((a, b) => a.price - b.price);
+
+      this.sortingOrder.orderByPrice === 'asc' ? SorteredElements : SorteredElements.reverse();
+
+      this.renderTableBody (SorteredElements);
+
       this.changeArrowSortingDirection(dataAttribute.action, this.sortingOrder);
-      
-     
-
-      console.log(this.elements);
-    } else if (dataAttribute.action === "search") {
-      let input = document.getElementById("search-text");
-
-      let filterText = input.value.toLowerCase();
-      const filteredElements = this.elements.filter(el => el.title.includes(filterText));
-
-      this.renderTableBody(this.sortingOrder, filteredElements);
       
     }
   
@@ -191,3 +187,4 @@ class Table {
 const table = new Table(elements, "table");
 
 table.initialize();
+
